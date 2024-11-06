@@ -1,6 +1,4 @@
-Below is a draft for your `README.md` file that outlines the project, describes the contents of your GitHub repository, and highlights the unique aspects of your work:
-
----
+<h1 align="center">nnUNet_Keru</h1> 
 
 # Evaluating nnU-Net on BraTS Dataset
 
