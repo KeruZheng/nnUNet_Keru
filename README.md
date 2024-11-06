@@ -26,8 +26,6 @@ This project focuses on evaluating the performance of the nnU-Net framework appl
 ## Special Features of This Repository
 This repository is unique in that it not only provides a comprehensive guide to implementing nnU-Net on the BraTS dataset but also includes detailed records of the challenges encountered during model replication. Each problem faced is accompanied by the specific solutions that were implemented, serving as a practical resource for others facing similar issues in their projects.
 
-
-To acknowledge the original authors and their repository in your README.md file, you can add a section for acknowledgments where you express gratitude and reference their work appropriately. Here is an example of how you might structure this:
-
 Acknowledgments
 We extend our sincere thanks to the developers of the nnU-Net framework and particularly to the team at the German Cancer Research Center (DKFZ) for their open-source contributions. This project could not have been accomplished without the foundational work available at MIC-DKFZ/nnUNet on GitHub. Their pioneering efforts in creating robust and flexible frameworks for medical image segmentation have been invaluable to our research.
+Dataset: https://www.med.upenn.edu/sbia/brats2017.html
