@@ -86,6 +86,14 @@ you can check for each label of configurations(epoch, batch size, num_of_iterati
 ```
 nnUNetv2_find_best_configuration DATASET_NAME_OR_ID -c CONFIGURATIONS
 ```
+1. debug.json: This file records in detail the parameters and configurations used to train this model. Although it may not be formatted for easy direct reading, it provides valuable data for debugging and reviewing the training process.
+model_best.model and model_best.model.pkl: These files save the state of the model that performed best during training, often used for further analysis and comparison of the model.
+2. model_final_checkpoint.model and model_final_checkpoint.model.pkl: These files store the state of the model at the end of training, typically used for the project's final validation and inference tasks.
+3. networkarchitecture.pdf: If the hiddenlayer library is installed, this PDF document provides a clear view of the network structure, aiding in understanding and presenting the model's construction.
+4. progress.png: This graphic shows the changes in training and validation losses throughout the training process, as well as changes in the Dice performance metric, serving as a visual tool for monitoring model performance.
+5. validation/summary.json: After training, the validation dataset is used for prediction, and this generated file contains detailed performance metrics to help assess the model's performance on unseen data.
+6. training_log: The training log file provides detailed output for each training cycle, including loss values, which are essential for monitoring training progress and tuning model parameters.
+
 ## Prediction 
 ```
 standard version:
