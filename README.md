@@ -29,3 +29,6 @@ This repository is unique in that it not only provides a comprehensive guide to 
 Acknowledgments
 We extend our sincere thanks to the developers of the nnU-Net framework and particularly to the team at the German Cancer Research Center (DKFZ) for their open-source contributions. This project could not have been accomplished without the foundational work available at MIC-DKFZ/nnUNet on GitHub. Their pioneering efforts in creating robust and flexible frameworks for medical image segmentation have been invaluable to our research.
 Dataset: https://www.med.upenn.edu/sbia/brats2017.html
+Blog may help:
+https://blog.csdn.net/m0_45521766/article/details/131539779?spm=1001.2014.3001.5502
+https://blog.csdn.net/qq_45794210/article/details/120699443
