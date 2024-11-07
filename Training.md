@@ -61,5 +61,5 @@ nnUNetv2_find_best_configuration DATASET_NAME_OR_ID -c CONFIGURATIONS
 ATTENTION!!
 you will find that even defined for the cuda service, once you run it will print:
 ![image](https://github.com/user-attachments/assets/cce18561-198e-40d0-9417-7ec35a83bbf8)
-it really confused me and cost me a lot of time. However, I checked for the 'nvidia-smi' and found that the mission is run on the right cuda device. 
+it really confused me and cost me a lot of time. However, I checked for the ' nvidia-smi ' and found that the mission is run on the right cuda device. 
 
