@@ -168,7 +168,7 @@ def compute_hausdorff(test, reference):
         return np.nan, np.nan
 ```
 
-## Prediction
+# Prediction
 ```
 standard version:
 My version：
@@ -190,7 +190,7 @@ nnUNetv2_train 900 3d_fullre 1  --val --npz
 ```
 it help output the summary data which we mentioned in Adapt mmodel before prediction. Accuracy, Dice and so on.
 
-## Evaluation
+# Evaluation
 use the command:
 `/nnUNet/nnunetv2/evaluation/evaluate_predictions.py -m model_best -t 900 -f 0`
 
