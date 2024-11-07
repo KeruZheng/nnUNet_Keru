@@ -85,6 +85,7 @@ you can check for each label of configurations(epoch, batch size, num_of_iterati
 
 ```
 nnUNetv2_find_best_configuration DATASET_NAME_OR_ID -c CONFIGURATIONS
+nnUNetv2_find_best_configuration 900 -c 2d 3d_fullres -f 0 1 2 3 4
 ```
 1. debug.json: This file records in detail the parameters and configurations used to train this model. Although it may not be formatted for easy direct reading, it provides valuable data for debugging and reviewing the training process.
 model_best.model and model_best.model.pkl: These files save the state of the model that performed best during training, often used for further analysis and comparison of the model.
@@ -94,11 +95,102 @@ model_best.model and model_best.model.pkl: These files save the state of the mod
 5. validation/summary.json: After training, the validation dataset is used for prediction, and this generated file contains detailed performance metrics to help assess the model's performance on unseen data.
 6. training_log: The training log file provides detailed output for each training cycle, including loss values, which are essential for monitoring training progress and tuning model parameters.
 
-## Prediction 
+once it finish, it will tell you the best configuration. 
+Also, will tell you following step for postprocessing, run predictions, run ensembling, run postprocessing with the ouput like:
+Before you start, please read **Adapt mmodel before prediction** for next chapter!!!! IMPORTANT!! 
+
+```
+***All results:***
+nnUNetTrainer__nnUNetPlans__2d: 0.6782021636508736
+nnUNetTrainer__nnUNetPlans__3d_fullres: 0.6941542933658592
+ensemble___nnUNetTrainer__nnUNetPlans__2d___nnUNetTrainer__nnUNetPlans__3d_fullres___0_1_2_3_4: 0.6984535117415662
+
+*Best*: ensemble___nnUNetTrainer__nnUNetPlans__2d___nnUNetTrainer__nnUNetPlans__3d_fullres___0_1_2_3_4: 0.6984535117415662
+
+***Determining postprocessing for best model/ensemble***
+Removing all but the largest foreground region did not improve results!
+Removing all but the largest component for 1 did not improve results! Dice before: 0.79562 after: 0.79345
+Removing all but the largest component for 2 did not improve results! Dice before: 0.55134 after: 0.53319
+Removing all but the largest component for 3 did not improve results! Dice before: 0.74839 after: 0.73296
+
+***Run inference like this:***
+
+An ensemble won! What a surprise! Run the following commands to run predictions with the ensemble members:
+
+nnUNetv2_predict -d Dataset900_BrainTumour -i /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/imagesTs -o /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/inferTs_2d -f  0 1 2 3 4 -tr nnUNetTrainer -c 2d -p nnUNetPlans --save_probabilities
+CUDA_VISIBLE_DEVICES=4 nnUNetv2_predict -d Dataset900_BrainTumour -i /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/imagesTs -o /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/inferTs_3d_fullres -f  0 1 2 3 4 -tr nnUNetTrainer -c 3d_fullres -p nnUNetPlans --save_probabilities
+
+The run ensembling with:
+
+# nnUNetv2_ensemble -i OUTPUT_FOLDER_MODEL_1 OUTPUT_FOLDER_MODEL_2 -o OUTPUT_FOLDER -np 8
+# 实际： nnUNetv2_ensemble -i /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/inferTs_2d /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/inferTs_3d_fullres -o /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_results/Dataset900_BrainTumour/BrainTumour_ensemble -np 8
+***Once inference is completed, run postprocessing like this:***
+
+# nnUNetv2_apply_postprocessing -i OUTPUT_FOLDER -o OUTPUT_FOLDER_PP -pp_pkl_file /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_results/Dataset900_BrainTumour/ensembles/ensemble___nnUNetTrainer__nnUNetPlans__2d___nnUNetTrainer__nnUNetPlans__3d_fullres___0_1_2_3_4/postprocessing.pkl -np 8 -plans_json /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_results/Dataset900_BrainTumour/ensembles/ensemble___nnUNetTrainer__nnUNetPlans__2d___nnUNetTrainer__nnUNetPlans__3d_fullres___0_1_2_3_4/plans.json
+# nnUNetv2_apply_postprocessing -i /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_results/Dataset900_BrainTumour/BrainTumour_ensemble -o /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_results/Dataset900_BrainTumour/BrainTumour_ensemble_pp -pp_pkl_file /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_results/Dataset900_BrainTumour/ensembles/ensemble___nnUNetTrainer__nnUNetPlans__2d___nnUNetTrainer__nnUNetPlans__3d_fullres___0_1_2_3_4/postprocessing.pkl -np 8 -plans_json /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_results/Dataset900_BrainTumour/ensembles/ensemble___nnUNetTrainer__nnUNetPlans__2d___nnUNetTrainer__nnUNetPlans__3d_fullres___0_1_2_3_4/plans.json
+```
+
+## Adapt mmodel before prediction 
+### important for adapting the model 
+### important for adapting the model
+### important for adapting the model
+
+Go to your   `/xxx/nnUNet/nnunetv2/evaluation/evaluate_predictions.py`
+find the function of `def compute_metrics()` 
+add two line of code 
+        ` 
+        # Sensitivity = TP/TP+FN (Recall)
+        results['metrics'][r]['Specificity'] = tn / (tn + fp) if (tn + fp) > 0 else np.nan
+        # Specificity = TN/TN+FP
+        results['metrics'][r]['Jaccard'] = tp / (tp + fp + fn) if (tp + fp + fn) != 0 else np.nan
+        ` 
+then we can caculate Sensitivity and Specificity in the summary.json ~~~
+the code is more useful in the nnunet v1, however, I failed to caculate the HD. I found other' s method as following:
+```
+def compute_hausdorff(test, reference):
+    # test & reference: shape(1, 155, 240, 240)
+    test_slices = test[0]  # (155, 240, 240)
+    reference_slices = reference[0] # (155, 240, 240)
+ 
+    all_hd = []
+
+    for i in range(test_slices.shape[0]):  
+        slice_test = test_slices[i]
+        slice_reference = reference_slices[i]
+        if slice_test.any() and slice_reference.any():  
+            hd = max(directed_hausdorff(slice_test, slice_reference)[0],
+                     directed_hausdorff(slice_reference, slice_test)[0])
+            all_hd.append(hd)
+    if all_hd:
+        hd95 = np.percentile(all_hd, 95)
+        return max(all_hd), hd95
+    else:
+        return np.nan, np.nan
+```
+
+## Prediction
 ```
 standard version:
 My version：
 nnUNetv2_predict -i /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/imagesTs -o /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/inferTs_2d -d 900 -c 2d --save_probabilities
 nnUNetv2_predict -i /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/imagesTs -o /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/inferTs_3d_fullres -d 900 -c  3d_fullres --save_probabilities
 ```
+Only specify --save_probabilities if you intend to use ensembling. --save_probabilities will make the command save the predicted probabilities alongside of the predicted segmentation masks requiring a lot of disk space.
+
+Please select a separate OUTPUT_FOLDER for each configuration!
+
+Note that per default, inference will be done with all 5 folds from the cross-validation as an ensemble. We very strongly recommend you use all 5 folds. Thus, all 5 folds must have been trained prior to running inference.
+
+If you wish to make predictions with a single model, train the all fold and specify it in nnUNetv2_predict with -f all
+
+## Validation after Prediction
+```
+nnUNetv2_train 900 2d 0  --val --npz
+nnUNetv2_train 900 3d_fullre 1  --val --npz
+```
+it help output the summary data which we mentioned in Adapt mmodel before prediction. Accuracy, Dice and so on.
+
+## Evaluation
+use the command:
+`/nnUNet/nnunetv2/evaluation/evaluate_predictions.py -m model_best -t 900 -f 0`
 
