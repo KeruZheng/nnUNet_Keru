@@ -41,6 +41,8 @@ my version
 CUDA_VISIBLE_DEVICES=3 nnUNetv2_train DATA_FOLD_CODE 3d_fullres(MISSION: ) 4 -device cuda -num_gpus 1
 ```
 
+nnU-Net employs 5-fold cross-validation to train all U-Net configurations, enabling it to ascertain post-processing techniques and ensemble strategies for the training dataset.That's why we need to train for 5 fold [0 1 2 3 4].
+This methodology enhances the generalizability and robustness of the model by averaging the performance across different subsets, thereby mitigating overfitting and ensuring that the model performs well on unseen data.
 ### 2D U-Net
 For FOLD in [0, 1, 2, 3, 4], run:
 ```
@@ -52,14 +54,43 @@ For FOLD in [0, 1, 2, 3, 4], run:
 nnUNetv2_train DATASET_NAME_OR_ID 3d_fullres FOLD [--npz]
 ```
 
-### Automatically determine the best configuration
-```
-nnUNetv2_find_best_configuration DATASET_NAME_OR_ID -c CONFIGURATIONS 
-```
-
-
 ATTENTION!!
 you will find that even defined for the cuda service, once you run it will print:
 ![image](https://github.com/user-attachments/assets/cce18561-198e-40d0-9417-7ec35a83bbf8)
-it really confused me and cost me a lot of time. However, I checked for the ' nvidia-smi ' and found that the mission is run on the right cuda device. 
+it really confused me and cost me a lot of time. However, I checked for the ` nvidia-smi ` and found that the mission is run on the right cuda device. 
+
+### Training Result
+The trained models are saved to the RESULTS_FOLDER/nnUNet directory. For our project, this translates to the path /home/work/nnUNet/nnUNetFrame/DATASET/nnUNet_trained_models/nnUNet. Each training session results in an automatically generated output folder name based on our training configuration. For instance, we would receive the folder nnUNetTrainer__nnUNetPlans__3d_fullres/Dataset900_BrainTumour
+```
+/data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_results/Dataset900_BrainTumour
+└── nnUNetTrainer__nnUNetPlans__3d_fullres
+    └── Dataset900_BrainTumour
+        ├── fold 1 - ..
+        ├── fold 2 - ..
+        ├── fold 3 - ..
+        ├── fold 4 - ..
+        └── fold 5
+            │── checkpoint_best.pth
+            │── checkpoint_final.pth
+            │── debug.json
+            ├── progress.png
+            └── training_log_2024_11_7_11_52_29.txt
+
+```
+
+you can check for each label of configurations(epoch, batch size, num_of_iteration_each_epoch ...), if your training is interupted by bad connnection or somethong happened accidentally, you can add  `-c ` to continue
+
+## Automatically determine the best configuration
+### Once the required configurations have been trained through comprehensive 5-fold cross-validation, nnU-Net can automatically identify the most suitable combination for your dataset. This automatic determination of the optimal configuration streamlines the process, ensuring that the model you deploy is fine-tuned for the best possible performance on your specific data.
+
+```
+nnUNetv2_find_best_configuration DATASET_NAME_OR_ID -c CONFIGURATIONS
+```
+## Prediction 
+```
+standard version:
+My version：
+nnUNetv2_predict -i /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/imagesTs -o /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/inferTs_2d -d 900 -c 2d --save_probabilities
+nnUNetv2_predict -i /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/imagesTs -o /data1/keru/nnUNet/nnUNetFrame/DATASET/nnUNet_raw/Dataset900_BrainTumour/inferTs_3d_fullres -d 900 -c  3d_fullres --save_probabilities
+```
 
